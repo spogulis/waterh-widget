@@ -34,6 +34,16 @@ Fenix applies after workouts), with one-tap manual sync.
   transport; don't point it at a server across the public internet unless it's
   behind HTTPS.
 
+## Cover displays (Motorola Razr and similar)
+
+The widget deliberately declares **no** `android:configure` activity: cover-
+screen widget pickers exclude widgets that require a setup step and ignore
+`configuration_optional` (verified on a Razr 60 — dropping `configure` is
+what made the widget appear in the external display's widget list; keyguard
+category, small minimums, and previewImage alone did not). Settings live in
+the app instead. There's also a full-screen dashboard (the launcher activity)
+for running the app itself on a cover display.
+
 ## Build
 
 Needs JDK 17+ and the Android SDK (set `sdk.dir` in `local.properties`):
