@@ -40,6 +40,16 @@ class ConfigActivity : Activity() {
         pkgField.setText(Config.waterhPackage(this))
         delayField.setText(Config.syncDelaySec(this).toString())
 
+        val coffeeRows = listOf(
+            Triple(Config.Coffee.BLACK, R.id.check_black, R.id.field_black_ml),
+            Triple(Config.Coffee.WHITE, R.id.check_white, R.id.field_white_ml),
+            Triple(Config.Coffee.CAPPUCCINO, R.id.check_capp, R.id.field_capp_ml),
+        )
+        for ((coffee, checkId, mlId) in coffeeRows) {
+            findViewById<CheckBox>(checkId).isChecked = Config.coffeeEnabled(this, coffee)
+            findViewById<EditText>(mlId).setText(Config.coffeeMl(this, coffee).toString())
+        }
+
         findViewById<Button>(R.id.btn_test).setOnClickListener {
             val url = Config.normalizeUrl(urlField.text.toString())
             if (url.isEmpty()) {
@@ -74,6 +84,17 @@ class ConfigActivity : Activity() {
                 pkgField.text.toString(),
                 delayField.text.toString().toIntOrNull() ?: Config.DEFAULT_SYNC_DELAY_SEC
             )
+            for ((coffee, checkId, mlId) in coffeeRows) {
+                Config.saveCoffee(
+                    this, coffee,
+                    findViewById<CheckBox>(checkId).isChecked,
+                    findViewById<EditText>(mlId).text.toString().toIntOrNull()
+                        ?: coffee.defaultMl
+                )
+            }
+            // Repaint immediately so button visibility changes apply even if
+            // the network fetch can't run right now.
+            WaterWidgetProvider.renderAll(this)
             WidgetUpdateWorker.schedulePeriodic(this)
             WidgetUpdateWorker.enqueueOnce(this, sync = false)
             Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show()

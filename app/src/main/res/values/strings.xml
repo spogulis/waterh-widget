@@ -25,6 +25,12 @@
     <string name="label_delay">Wait before server sync (seconds)</string>
     <string name="hint_delay">40</string>
     <string name="note_waiting_waterh">WaterH opened — syncing in %1$ds…</string>
+    <string name="label_coffee_section">Coffee quick-add buttons (ml per tap)</string>
+    <string name="coffee_black">Black coffee</string>
+    <string name="coffee_white">White coffee</string>
+    <string name="coffee_capp">Cappuccino</string>
+    <string name="hint_ml">ml</string>
+    <string name="note_adding">Adding %1$d ml…</string>
     <string name="waterh_not_found">WaterH app not found (%1$s) — syncing directly</string>
     <string name="widget_description">Water intake vs. Garmin dynamic goal</string>
 </resources>

@@ -28,8 +28,14 @@ class WidgetUpdateWorker(appContext: Context, params: WorkerParameters) :
             return@withContext Result.success()
         }
         try {
-            if (inputData.getBoolean(KEY_SYNC, false)) Api.runSync(server)
-            Config.saveStatus(ctx, Api.fetchStatus(server))
+            val addMl = inputData.getInt(KEY_ADD_ML, 0)
+            if (addMl > 0) {
+                // /add replies with fresh status, so no second round-trip.
+                Config.saveStatus(ctx, Api.addIntake(server, addMl))
+            } else {
+                if (inputData.getBoolean(KEY_SYNC, false)) Api.runSync(server)
+                Config.saveStatus(ctx, Api.fetchStatus(server))
+            }
         } catch (e: Exception) {
             Config.saveError(ctx, e.message ?: e.javaClass.simpleName)
         }
@@ -39,8 +45,13 @@ class WidgetUpdateWorker(appContext: Context, params: WorkerParameters) :
 
     companion object {
         private const val KEY_SYNC = "sync"
+        private const val KEY_ADD_ML = "addMl"
         private const val PERIODIC_WORK = "waterh-refresh"
-        private const val ONCE_WORK = "waterh-refresh-now"
+        private const val REFRESH_WORK = "waterh-refresh-now"
+        // Separate names so a refresh tap can't cancel a pending delayed sync,
+        // and coffee adds queue up instead of clobbering either.
+        private const val SYNC_WORK = "waterh-sync-now"
+        private const val ADD_WORK = "waterh-add"
 
         fun enqueueOnce(ctx: Context, sync: Boolean, delaySec: Long = 0) {
             val req = OneTimeWorkRequestBuilder<WidgetUpdateWorker>()
@@ -50,8 +61,21 @@ class WidgetUpdateWorker(appContext: Context, params: WorkerParameters) :
                     Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
                 )
                 .build()
-            WorkManager.getInstance(ctx)
-                .enqueueUniqueWork(ONCE_WORK, ExistingWorkPolicy.REPLACE, req)
+            WorkManager.getInstance(ctx).enqueueUniqueWork(
+                if (sync) SYNC_WORK else REFRESH_WORK, ExistingWorkPolicy.REPLACE, req
+            )
+        }
+
+        fun enqueueAdd(ctx: Context, ml: Int) {
+            // Deliberately no network constraint: offline, the attempt fails
+            // fast and the widget shows an error instead of the tap sitting
+            // in a queue for hours and logging a long-forgotten coffee later.
+            val req = OneTimeWorkRequestBuilder<WidgetUpdateWorker>()
+                .setInputData(Data.Builder().putInt(KEY_ADD_ML, ml).build())
+                .build()
+            WorkManager.getInstance(ctx).enqueueUniqueWork(
+                ADD_WORK, ExistingWorkPolicy.APPEND_OR_REPLACE, req
+            )
         }
 
         fun schedulePeriodic(ctx: Context) {

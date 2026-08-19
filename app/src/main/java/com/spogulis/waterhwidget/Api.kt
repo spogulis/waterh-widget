@@ -10,8 +10,20 @@ import java.net.URLEncoder
 object Api {
     class ApiException(message: String) : Exception(message)
 
-    fun fetchStatus(server: Config.Server): Config.Status {
-        val body = get("${server.baseUrl}/status?key=${enc(server.key)}")
+    fun fetchStatus(server: Config.Server): Config.Status =
+        parseStatus(get("${server.baseUrl}/status?key=${enc(server.key)}"))
+
+    /** Log a manual intake (coffee button); the server replies with fresh status. */
+    fun addIntake(server: Config.Server, ml: Int): Config.Status {
+        val body = get("${server.baseUrl}/add?key=${enc(server.key)}&ml=$ml")
+        val json = JSONObject(body)
+        // The add committed but the server couldn't read fresh status —
+        // fetch it ourselves rather than reporting a false failure.
+        if (!json.has("intake_ml") && json.has("added_ml")) return fetchStatus(server)
+        return parseStatus(body)
+    }
+
+    private fun parseStatus(body: String): Config.Status {
         val json = JSONObject(body)
         if (json.has("error")) throw ApiException(json.getString("error"))
         return Config.Status(

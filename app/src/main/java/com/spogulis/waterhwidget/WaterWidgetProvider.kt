@@ -45,12 +45,25 @@ class WaterWidgetProvider : AppWidgetProvider() {
                 renderAll(ctx, note = ctx.getString(R.string.note_syncing))
                 WidgetUpdateWorker.enqueueOnce(ctx, sync = true)
             }
+            ACTION_ADD_BLACK, ACTION_ADD_WHITE, ACTION_ADD_CAPP -> {
+                val coffee = when (intent.action) {
+                    ACTION_ADD_BLACK -> Config.Coffee.BLACK
+                    ACTION_ADD_WHITE -> Config.Coffee.WHITE
+                    else -> Config.Coffee.CAPPUCCINO
+                }
+                val ml = Config.coffeeMl(ctx, coffee)
+                renderAll(ctx, note = ctx.getString(R.string.note_adding, ml))
+                WidgetUpdateWorker.enqueueAdd(ctx, ml)
+            }
         }
     }
 
     companion object {
         const val ACTION_REFRESH = "com.spogulis.waterhwidget.REFRESH"
         const val ACTION_SYNC = "com.spogulis.waterhwidget.SYNC"
+        const val ACTION_ADD_BLACK = "com.spogulis.waterhwidget.ADD_BLACK"
+        const val ACTION_ADD_WHITE = "com.spogulis.waterhwidget.ADD_WHITE"
+        const val ACTION_ADD_CAPP = "com.spogulis.waterhwidget.ADD_CAPP"
 
         // Launchers report ~70dp per grid cell minus margins; two cells start
         // safely above this.
@@ -94,6 +107,21 @@ class WaterWidgetProvider : AppWidgetProvider() {
 
             views.setOnClickPendingIntent(R.id.widget_root, broadcast(ctx, ACTION_REFRESH, 1))
             views.setOnClickPendingIntent(R.id.btn_sync, syncIntent(ctx))
+
+            val coffees = listOf(
+                Triple(R.id.btn_black, Config.Coffee.BLACK, ACTION_ADD_BLACK to 3),
+                Triple(R.id.btn_white, Config.Coffee.WHITE, ACTION_ADD_WHITE to 4),
+                Triple(R.id.btn_capp, Config.Coffee.CAPPUCCINO, ACTION_ADD_CAPP to 5),
+            )
+            for ((viewId, coffee, actionAndCode) in coffees) {
+                val (action, requestCode) = actionAndCode
+                if (Config.coffeeEnabled(ctx, coffee)) {
+                    views.setViewVisibility(viewId, android.view.View.VISIBLE)
+                    views.setOnClickPendingIntent(viewId, broadcast(ctx, action, requestCode))
+                } else {
+                    views.setViewVisibility(viewId, android.view.View.GONE)
+                }
+            }
             return views
         }
 

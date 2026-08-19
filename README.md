@@ -15,6 +15,12 @@ Fenix applies after workouts), with one-tap manual sync.
 
 - **Tap anywhere** on the widget → refresh from the server (`GET /status`).
 - **Tap ↻** → run a WaterH → Garmin sync (`GET /sync`), then refresh.
+- **Coffee buttons** (black ☕ / white / cappuccino, each with its own icon):
+  one tap logs a configurable amount (`GET /add?ml=…`) straight into Garmin.
+  Each button can be disabled and its ml amount set in the app's settings.
+  Requires the server's delta-based sync (v2+), which never absorbs manual
+  Garmin additions into the bottle total. Offline taps fail fast with an
+  error on the widget — re-tap when connected; taps are never queued.
 - Auto-refreshes every 30 minutes via WorkManager (network required; Doze may
   delay it — tap to force).
 - No credentials on the phone: only the server URL and the `SYNC_KEY`.

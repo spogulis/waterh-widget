@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Large variant: 2+ cells high — bigger type, thicker bar, roomier padding. -->
+<!-- Large variant: 2+ cells high — full-width title, thick bar, and the
+     button cluster on its own bottom row where there's room to breathe. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
@@ -9,33 +10,16 @@
     android:padding="18dp"
     android:background="@drawable/widget_bg">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/txt_main"
+        android:ellipsize="end"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:id="@+id/txt_main"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:textColor="@color/widget_text"
-            android:maxLines="1"
-            android:text="@string/main_placeholder" />
-
-        <ImageButton
-            android:id="@+id/btn_sync"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
-            android:src="@drawable/ic_sync"
-            android:scaleType="fitCenter"
-            android:padding="4dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/sync_now" />
-    </LinearLayout>
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_text"
+        android:maxLines="1"
+        android:text="@string/main_placeholder" />
 
     <ProgressBar
         android:id="@+id/progress"
@@ -47,13 +31,63 @@
         android:max="1"
         android:progress="0" />
 
-    <TextView
-        android:id="@+id/txt_sub"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textSize="15sp"
-        android:textColor="@color/widget_text_secondary"
-        android:maxLines="1"
-        android:text="@string/error_not_configured" />
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/txt_sub"
+        android:ellipsize="end"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="15sp"
+            android:textColor="@color/widget_text_secondary"
+            android:maxLines="1"
+            android:text="@string/error_not_configured" />
+
+        <ImageButton
+            android:id="@+id/btn_black"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:src="@drawable/ic_coffee_black"
+            android:scaleType="fitCenter"
+            android:padding="4dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/coffee_black" />
+
+        <ImageButton
+            android:id="@+id/btn_white"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:src="@drawable/ic_coffee_white"
+            android:scaleType="fitCenter"
+            android:padding="4dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/coffee_white" />
+
+        <ImageButton
+            android:id="@+id/btn_capp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:src="@drawable/ic_coffee_capp"
+            android:scaleType="fitCenter"
+            android:padding="4dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/coffee_capp" />
+
+        <ImageButton
+            android:id="@+id/btn_sync"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="6dp"
+            android:src="@drawable/ic_sync"
+            android:scaleType="fitCenter"
+            android:padding="4dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/sync_now" />
+    </LinearLayout>
 </LinearLayout>

@@ -60,6 +60,27 @@ object Config {
             .apply()
     }
 
+    // --- coffee quick-add buttons --------------------------------------------
+
+    enum class Coffee(val key: String, val defaultMl: Int) {
+        BLACK("black", 200),
+        WHITE("white", 250),
+        CAPPUCCINO("capp", 150),
+    }
+
+    fun coffeeEnabled(ctx: Context, c: Coffee): Boolean =
+        prefs(ctx).getBoolean("coffee_${c.key}_on", true)
+
+    fun coffeeMl(ctx: Context, c: Coffee): Int =
+        prefs(ctx).getInt("coffee_${c.key}_ml", c.defaultMl)
+
+    fun saveCoffee(ctx: Context, c: Coffee, enabled: Boolean, ml: Int) {
+        prefs(ctx).edit()
+            .putBoolean("coffee_${c.key}_on", enabled)
+            .putInt("coffee_${c.key}_ml", ml.coerceIn(1, 2000))
+            .apply()
+    }
+
     fun saveStatus(ctx: Context, s: Status) {
         prefs(ctx).edit()
             .putString("st_date", s.date)
