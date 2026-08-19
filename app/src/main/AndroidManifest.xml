@@ -21,13 +21,21 @@
         android:usesCleartextTraffic="true"
         android:theme="@android:style/Theme.DeviceDefault">
 
+        <!-- Glanceable dashboard, sized for cover/external displays too. -->
         <activity
-            android:name=".ConfigActivity"
-            android:exported="true">
+            android:name=".DashboardActivity"
+            android:exported="true"
+            android:resizeableActivity="true"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ConfigActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>

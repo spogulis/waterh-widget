@@ -38,6 +38,7 @@
     <string name="manual_fix_hint">Admin fix: sets the coffee counter only — does NOT change the Garmin water total.</string>
     <string name="set_now">Set</string>
     <string name="set_ok">✅ Coffee counter set to %1$d ml (water total untouched)</string>
+    <string name="open_settings">Settings</string>
     <string name="waterh_not_found">WaterH app not found (%1$s) — syncing directly</string>
     <string name="widget_description">Water intake vs. Garmin dynamic goal</string>
 </resources>

@@ -115,7 +115,7 @@ class WaterWidgetProvider : AppWidgetProvider() {
                 )
                 val max = st.goalMl.coerceAtLeast(1)
                 views.setProgressBar(R.id.progress, max, st.intakeMl, animating)
-                views.setTextViewText(R.id.txt_sub, note ?: subLine(ctx, st, err, coffeeToday))
+                views.setTextViewText(R.id.txt_sub, note ?: statusLine(ctx, st, err, coffeeToday))
                 if (layoutId == R.layout.widget_large) {
                     // Second bar on the same scale: the coffee share of today.
                     if (coffeeToday > 0) {
@@ -179,7 +179,8 @@ class WaterWidgetProvider : AppWidgetProvider() {
                 broadcast(ctx, ACTION_SYNC, 2)
             }
 
-        private fun subLine(ctx: Context, st: Config.Status, err: String?, coffeeToday: Int): String {
+        /** Shared with DashboardActivity — the "42% · goal +550 sweat · ☕ 350 ml · 16:25" line. */
+        fun statusLine(ctx: Context, st: Config.Status, err: String?, coffeeToday: Int): String {
             val parts = mutableListOf("${st.percent}%")
             if (st.sweatLossMl > 0) {
                 parts += ctx.getString(R.string.sweat_bump, st.sweatLossMl)
