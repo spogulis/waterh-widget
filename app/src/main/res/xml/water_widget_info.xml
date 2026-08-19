@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- keyguard category + small minimums: cover/secondary displays (e.g. the
+     Razr's external screen) filter their widget pickers on both. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="250dp"
-    android:minHeight="60dp"
+    android:minWidth="180dp"
+    android:minHeight="50dp"
+    android:minResizeWidth="140dp"
+    android:minResizeHeight="40dp"
     android:targetCellWidth="4"
     android:targetCellHeight="1"
     android:updatePeriodMillis="1800000"
@@ -9,5 +13,5 @@
     android:previewLayout="@layout/widget"
     android:configure="com.spogulis.waterhwidget.ConfigActivity"
     android:resizeMode="horizontal|vertical"
-    android:widgetCategory="home_screen"
+    android:widgetCategory="home_screen|keyguard"
     android:description="@string/widget_description" />
