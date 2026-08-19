@@ -50,6 +50,33 @@ class ConfigActivity : Activity() {
             findViewById<EditText>(mlId).setText(Config.coffeeMl(this, coffee).toString())
         }
 
+        val manualField = findViewById<EditText>(R.id.field_manual_ml)
+        Config.loadStatus(this)?.let {
+            manualField.setText(Config.coffeeToday(this, it.date).toString())
+        }
+        findViewById<Button>(R.id.btn_set_manual).setOnClickListener {
+            val server = Config.loadServer(this)
+            val ml = manualField.text.toString().toIntOrNull()
+            if (server == null || ml == null || ml < 0) {
+                result.text = getString(
+                    if (server == null) R.string.error_not_configured else R.string.hint_ml
+                )
+                return@setOnClickListener
+            }
+            result.text = getString(R.string.testing)
+            thread {
+                val msg = try {
+                    val st = Api.setManualToday(server, ml)
+                    Config.saveStatus(this, st)
+                    WaterWidgetProvider.renderAll(this)
+                    getString(R.string.set_ok, ml)
+                } catch (e: Exception) {
+                    getString(R.string.test_fail, e.message ?: e.javaClass.simpleName)
+                }
+                runOnUiThread { result.text = msg }
+            }
+        }
+
         findViewById<Button>(R.id.btn_test).setOnClickListener {
             val url = Config.normalizeUrl(urlField.text.toString())
             if (url.isEmpty()) {

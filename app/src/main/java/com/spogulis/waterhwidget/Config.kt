@@ -16,6 +16,9 @@ object Config {
         val sweatLossMl: Int,
         val percent: Int,
         val fetchedAt: Long,
+        // Server-side per-day manual-intake ledger; -1 = server didn't report
+        // it (pre-ledger server version).
+        val manualTodayMl: Int = -1,
     )
 
     private fun prefs(ctx: Context) = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -117,7 +120,7 @@ object Config {
     }
 
     fun saveStatus(ctx: Context, s: Status) {
-        prefs(ctx).edit()
+        val e = prefs(ctx).edit()
             .putString("st_date", s.date)
             .putInt("st_intake", s.intakeMl)
             .putInt("st_goal", s.goalMl)
@@ -126,7 +129,12 @@ object Config {
             .putInt("st_percent", s.percent)
             .putLong("st_fetched", s.fetchedAt)
             .remove("st_error")
-            .apply()
+        // The server's manual ledger is the source of truth; the local tally
+        // just mirrors it whenever the server reports one.
+        if (s.manualTodayMl >= 0) {
+            e.putString("ct_date", s.date).putInt("ct_ml", s.manualTodayMl)
+        }
+        e.apply()
     }
 
     fun loadStatus(ctx: Context): Status? {

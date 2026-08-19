@@ -105,7 +105,8 @@ class WaterWidgetProvider : AppWidgetProvider() {
             val st = Config.loadStatus(ctx)
             val err = Config.lastError(ctx)
             val today = LocalDate.now().toString()
-            val coffeeToday = Config.coffeeToday(ctx, today)
+            // Tally is keyed by the server's day (mirrored from its ledger).
+            val coffeeToday = Config.coffeeToday(ctx, st?.date ?: today)
 
             if (st != null) {
                 views.setTextViewText(

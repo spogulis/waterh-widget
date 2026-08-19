@@ -23,6 +23,10 @@ object Api {
         return parseStatus(body)
     }
 
+    /** Admin fix: overwrite today's coffee ledger on the server (no Garmin write). */
+    fun setManualToday(server: Config.Server, ml: Int): Config.Status =
+        parseStatus(get("${server.baseUrl}/set_manual?key=${enc(server.key)}&ml=$ml"))
+
     private fun parseStatus(body: String): Config.Status {
         val json = JSONObject(body)
         if (json.has("error")) throw ApiException(json.getString("error"))
@@ -34,6 +38,7 @@ object Api {
             sweatLossMl = json.optInt("sweat_loss_ml", 0),
             percent = json.optInt("percent", 0),
             fetchedAt = System.currentTimeMillis(),
+            manualTodayMl = json.optInt("manual_today_ml", -1),
         )
     }
 

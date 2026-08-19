@@ -34,7 +34,9 @@ class WidgetUpdateWorker(appContext: Context, params: WorkerParameters) :
                 val st = Api.addIntake(server, addMl)
                 Config.saveStatus(ctx, st)
                 val today = java.time.LocalDate.now().toString()
-                Config.bumpCoffeeToday(ctx, today, addMl)
+                // saveStatus mirrors the server ledger; bump locally only when
+                // talking to a pre-ledger server that didn't report it.
+                if (st.manualTodayMl < 0) Config.bumpCoffeeToday(ctx, today, addMl)
                 if (addMl > 0) {
                     Config.saveLastAdd(
                         ctx, addMl, inputData.getString(KEY_ADD_LABEL) ?: "", today
