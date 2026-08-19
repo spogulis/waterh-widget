@@ -11,7 +11,9 @@
     android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/widget"
     android:previewLayout="@layout/widget"
+    android:previewImage="@drawable/widget_preview"
     android:configure="com.spogulis.waterhwidget.ConfigActivity"
+    android:widgetFeatures="configuration_optional|reconfigurable"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen|keyguard"
     android:description="@string/widget_description" />
