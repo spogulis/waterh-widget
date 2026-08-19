@@ -42,9 +42,10 @@ class WidgetUpdateWorker(appContext: Context, params: WorkerParameters) :
         private const val PERIODIC_WORK = "waterh-refresh"
         private const val ONCE_WORK = "waterh-refresh-now"
 
-        fun enqueueOnce(ctx: Context, sync: Boolean) {
+        fun enqueueOnce(ctx: Context, sync: Boolean, delaySec: Long = 0) {
             val req = OneTimeWorkRequestBuilder<WidgetUpdateWorker>()
                 .setInputData(Data.Builder().putBoolean(KEY_SYNC, sync).build())
+                .setInitialDelay(delaySec, TimeUnit.SECONDS)
                 .setConstraints(
                     Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
                 )

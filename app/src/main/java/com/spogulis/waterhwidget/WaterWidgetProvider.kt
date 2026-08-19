@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.widget.RemoteViews
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -17,6 +18,12 @@ class WaterWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(ctx: Context, mgr: AppWidgetManager, ids: IntArray) {
         renderAll(ctx)
         WidgetUpdateWorker.enqueueOnce(ctx, sync = false)
+    }
+
+    override fun onAppWidgetOptionsChanged(
+        ctx: Context, mgr: AppWidgetManager, appWidgetId: Int, newOptions: Bundle
+    ) {
+        mgr.updateAppWidget(appWidgetId, build(ctx, null, layoutFor(mgr, appWidgetId)))
     }
 
     override fun onEnabled(ctx: Context) {
@@ -45,17 +52,27 @@ class WaterWidgetProvider : AppWidgetProvider() {
         const val ACTION_REFRESH = "com.spogulis.waterhwidget.REFRESH"
         const val ACTION_SYNC = "com.spogulis.waterhwidget.SYNC"
 
+        // Launchers report ~70dp per grid cell minus margins; two cells start
+        // safely above this.
+        private const val LARGE_MIN_HEIGHT_DP = 105
+
         /** Repaint every widget instance from the cached status. */
         fun renderAll(ctx: Context, note: String? = null) {
             val mgr = AppWidgetManager.getInstance(ctx)
             val ids = mgr.getAppWidgetIds(ComponentName(ctx, WaterWidgetProvider::class.java))
-            if (ids.isEmpty()) return
-            val views = build(ctx, note)
-            mgr.updateAppWidget(ids, views)
+            for (id in ids) {
+                mgr.updateAppWidget(id, build(ctx, note, layoutFor(mgr, id)))
+            }
         }
 
-        private fun build(ctx: Context, note: String?): RemoteViews {
-            val views = RemoteViews(ctx.packageName, R.layout.widget)
+        private fun layoutFor(mgr: AppWidgetManager, id: Int): Int {
+            val minH = mgr.getAppWidgetOptions(id)
+                .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+            return if (minH >= LARGE_MIN_HEIGHT_DP) R.layout.widget_large else R.layout.widget
+        }
+
+        private fun build(ctx: Context, note: String?, layoutId: Int): RemoteViews {
+            val views = RemoteViews(ctx.packageName, layoutId)
             val st = Config.loadStatus(ctx)
             val err = Config.lastError(ctx)
 
@@ -76,9 +93,22 @@ class WaterWidgetProvider : AppWidgetProvider() {
             }
 
             views.setOnClickPendingIntent(R.id.widget_root, broadcast(ctx, ACTION_REFRESH, 1))
-            views.setOnClickPendingIntent(R.id.btn_sync, broadcast(ctx, ACTION_SYNC, 2))
+            views.setOnClickPendingIntent(R.id.btn_sync, syncIntent(ctx))
             return views
         }
+
+        /** Sync taps either broadcast directly or detour through the WaterH app. */
+        private fun syncIntent(ctx: Context): PendingIntent =
+            if (Config.openWaterhEnabled(ctx)) {
+                PendingIntent.getActivity(
+                    ctx, 2,
+                    Intent(ctx, SyncActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                broadcast(ctx, ACTION_SYNC, 2)
+            }
 
         private fun subLine(ctx: Context, st: Config.Status, err: String?): String {
             val parts = mutableListOf("${st.percent}%")

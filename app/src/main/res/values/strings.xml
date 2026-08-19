@@ -19,5 +19,12 @@
     <string name="test_ok">✅ OK — today %1$d ml of %2$d ml goal (sweat +%3$d ml)</string>
     <string name="test_fail">❌ %1$s</string>
     <string name="saved">Saved</string>
+    <string name="label_open_waterh">Open WaterH app when syncing</string>
+    <string name="label_waterh_pkg">WaterH app package</string>
+    <string name="hint_waterh_pkg">com.waterh</string>
+    <string name="label_delay">Wait before server sync (seconds)</string>
+    <string name="hint_delay">40</string>
+    <string name="note_waiting_waterh">WaterH opened — syncing in %1$ds…</string>
+    <string name="waterh_not_found">WaterH app not found (%1$s) — syncing directly</string>
     <string name="widget_description">Water intake vs. Garmin dynamic goal</string>
 </resources>

@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Compact variant: must fit a 1-cell-high widget, so every dp is rationed. -->
+<!-- Large variant: 2+ cells high — bigger type, thicker bar, roomier padding. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center_vertical"
-    android:paddingLeft="12dp"
-    android:paddingRight="12dp"
-    android:paddingTop="6dp"
-    android:paddingBottom="6dp"
+    android:padding="18dp"
     android:background="@drawable/widget_bg">
 
     <LinearLayout
@@ -23,7 +20,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="15sp"
+            android:textSize="26sp"
             android:textStyle="bold"
             android:textColor="@color/widget_text"
             android:maxLines="1"
@@ -31,11 +28,11 @@
 
         <ImageButton
             android:id="@+id/btn_sync"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
             android:src="@drawable/ic_sync"
             android:scaleType="fitCenter"
-            android:padding="2dp"
+            android:padding="4dp"
             android:background="@android:color/transparent"
             android:contentDescription="@string/sync_now" />
     </LinearLayout>
@@ -44,8 +41,8 @@
         android:id="@+id/progress"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="6dp"
-        android:layout_marginTop="3dp"
+        android:layout_height="14dp"
+        android:layout_marginTop="12dp"
         android:progressDrawable="@drawable/progress_water"
         android:max="1"
         android:progress="0" />
@@ -54,8 +51,8 @@
         android:id="@+id/txt_sub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:textSize="11sp"
+        android:layout_marginTop="8dp"
+        android:textSize="15sp"
         android:textColor="@color/widget_text_secondary"
         android:maxLines="1"
         android:text="@string/error_not_configured" />

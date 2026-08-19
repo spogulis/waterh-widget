@@ -45,6 +45,41 @@
             android:inputType="textVisiblePassword"
             android:hint="@string/hint_key" />
 
+        <CheckBox
+            android:id="@+id/check_open_waterh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/label_open_waterh" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/label_waterh_pkg"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/field_waterh_pkg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textNoSuggestions"
+            android:hint="@string/hint_waterh_pkg" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/label_delay"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/field_delay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="@string/hint_delay" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

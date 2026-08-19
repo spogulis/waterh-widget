@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
@@ -26,12 +27,18 @@ class ConfigActivity : Activity() {
 
         val urlField = findViewById<EditText>(R.id.field_url)
         val keyField = findViewById<EditText>(R.id.field_key)
+        val openWaterh = findViewById<CheckBox>(R.id.check_open_waterh)
+        val pkgField = findViewById<EditText>(R.id.field_waterh_pkg)
+        val delayField = findViewById<EditText>(R.id.field_delay)
         val result = findViewById<TextView>(R.id.txt_result)
 
         Config.loadServer(this)?.let {
             urlField.setText(it.baseUrl)
             keyField.setText(it.key)
         }
+        openWaterh.isChecked = Config.openWaterhEnabled(this)
+        pkgField.setText(Config.waterhPackage(this))
+        delayField.setText(Config.syncDelaySec(this).toString())
 
         findViewById<Button>(R.id.btn_test).setOnClickListener {
             val url = Config.normalizeUrl(urlField.text.toString())
@@ -61,6 +68,12 @@ class ConfigActivity : Activity() {
             }
             urlField.setText(url)
             Config.saveServer(this, url, keyField.text.toString())
+            Config.saveOpenWaterh(
+                this,
+                openWaterh.isChecked,
+                pkgField.text.toString(),
+                delayField.text.toString().toIntOrNull() ?: Config.DEFAULT_SYNC_DELAY_SEC
+            )
             WidgetUpdateWorker.schedulePeriodic(this)
             WidgetUpdateWorker.enqueueOnce(this, sync = false)
             Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show()

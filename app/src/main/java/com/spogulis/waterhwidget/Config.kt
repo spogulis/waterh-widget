@@ -40,6 +40,26 @@ object Config {
             .apply()
     }
 
+    // --- "open WaterH app when syncing" option -------------------------------
+
+    const val DEFAULT_WATERH_PACKAGE = "com.waterh"
+    const val DEFAULT_SYNC_DELAY_SEC = 40
+
+    fun openWaterhEnabled(ctx: Context) = prefs(ctx).getBoolean("openWaterh", false)
+
+    fun waterhPackage(ctx: Context): String =
+        prefs(ctx).getString("waterhPackage", "")!!.trim().ifEmpty { DEFAULT_WATERH_PACKAGE }
+
+    fun syncDelaySec(ctx: Context): Int = prefs(ctx).getInt("syncDelaySec", DEFAULT_SYNC_DELAY_SEC)
+
+    fun saveOpenWaterh(ctx: Context, enabled: Boolean, pkg: String, delaySec: Int) {
+        prefs(ctx).edit()
+            .putBoolean("openWaterh", enabled)
+            .putString("waterhPackage", pkg.trim())
+            .putInt("syncDelaySec", delaySec.coerceIn(5, 600))
+            .apply()
+    }
+
     fun saveStatus(ctx: Context, s: Status) {
         prefs(ctx).edit()
             .putString("st_date", s.date)
