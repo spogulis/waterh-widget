@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.RemoteViews
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -23,7 +24,7 @@ class WaterWidgetProvider : AppWidgetProvider() {
     override fun onAppWidgetOptionsChanged(
         ctx: Context, mgr: AppWidgetManager, appWidgetId: Int, newOptions: Bundle
     ) {
-        mgr.updateAppWidget(appWidgetId, build(ctx, null, layoutFor(mgr, appWidgetId)))
+        mgr.updateAppWidget(appWidgetId, build(ctx, null, false, layoutFor(mgr, appWidgetId)))
     }
 
     override fun onEnabled(ctx: Context) {
@@ -38,11 +39,11 @@ class WaterWidgetProvider : AppWidgetProvider() {
         super.onReceive(ctx, intent)
         when (intent.action) {
             ACTION_REFRESH -> {
-                renderAll(ctx, note = ctx.getString(R.string.note_refreshing))
+                renderAll(ctx, note = ctx.getString(R.string.note_refreshing), animating = true)
                 WidgetUpdateWorker.enqueueOnce(ctx, sync = false)
             }
             ACTION_SYNC -> {
-                renderAll(ctx, note = ctx.getString(R.string.note_syncing))
+                renderAll(ctx, note = ctx.getString(R.string.note_syncing), animating = true)
                 WidgetUpdateWorker.enqueueOnce(ctx, sync = true)
             }
             ACTION_ADD_BLACK, ACTION_ADD_WHITE, ACTION_ADD_CAPP -> {
@@ -52,8 +53,22 @@ class WaterWidgetProvider : AppWidgetProvider() {
                     else -> Config.Coffee.CAPPUCCINO
                 }
                 val ml = Config.coffeeMl(ctx, coffee)
-                renderAll(ctx, note = ctx.getString(R.string.note_adding, ml))
-                WidgetUpdateWorker.enqueueAdd(ctx, ml)
+                val label = ctx.getString(coffee.labelRes)
+                renderAll(
+                    ctx,
+                    note = ctx.getString(R.string.note_adding, ml, label),
+                    animating = true,
+                )
+                WidgetUpdateWorker.enqueueAdd(ctx, ml, label)
+            }
+            ACTION_UNDO -> {
+                val last = Config.loadLastAdd(ctx) ?: return
+                renderAll(
+                    ctx,
+                    note = ctx.getString(R.string.note_removing, last.ml, last.label),
+                    animating = true,
+                )
+                WidgetUpdateWorker.enqueueAdd(ctx, -last.ml, last.label)
             }
         }
     }
@@ -64,17 +79,18 @@ class WaterWidgetProvider : AppWidgetProvider() {
         const val ACTION_ADD_BLACK = "com.spogulis.waterhwidget.ADD_BLACK"
         const val ACTION_ADD_WHITE = "com.spogulis.waterhwidget.ADD_WHITE"
         const val ACTION_ADD_CAPP = "com.spogulis.waterhwidget.ADD_CAPP"
+        const val ACTION_UNDO = "com.spogulis.waterhwidget.UNDO"
 
         // Launchers report ~70dp per grid cell minus margins; two cells start
         // safely above this.
         private const val LARGE_MIN_HEIGHT_DP = 105
 
         /** Repaint every widget instance from the cached status. */
-        fun renderAll(ctx: Context, note: String? = null) {
+        fun renderAll(ctx: Context, note: String? = null, animating: Boolean = false) {
             val mgr = AppWidgetManager.getInstance(ctx)
             val ids = mgr.getAppWidgetIds(ComponentName(ctx, WaterWidgetProvider::class.java))
             for (id in ids) {
-                mgr.updateAppWidget(id, build(ctx, note, layoutFor(mgr, id)))
+                mgr.updateAppWidget(id, build(ctx, note, animating, layoutFor(mgr, id)))
             }
         }
 
@@ -84,25 +100,40 @@ class WaterWidgetProvider : AppWidgetProvider() {
             return if (minH >= LARGE_MIN_HEIGHT_DP) R.layout.widget_large else R.layout.widget
         }
 
-        private fun build(ctx: Context, note: String?, layoutId: Int): RemoteViews {
+        private fun build(ctx: Context, note: String?, animating: Boolean, layoutId: Int): RemoteViews {
             val views = RemoteViews(ctx.packageName, layoutId)
             val st = Config.loadStatus(ctx)
             val err = Config.lastError(ctx)
+            val today = LocalDate.now().toString()
+            val coffeeToday = Config.coffeeToday(ctx, today)
 
             if (st != null) {
                 views.setTextViewText(
                     R.id.txt_main,
                     ctx.getString(R.string.main_line, st.intakeMl, st.goalMl)
                 )
-                views.setProgressBar(R.id.progress, st.goalMl.coerceAtLeast(1), st.intakeMl, false)
-                views.setTextViewText(R.id.txt_sub, note ?: subLine(ctx, st, err))
+                val max = st.goalMl.coerceAtLeast(1)
+                views.setProgressBar(R.id.progress, max, st.intakeMl, animating)
+                views.setTextViewText(R.id.txt_sub, note ?: subLine(ctx, st, err, coffeeToday))
+                if (layoutId == R.layout.widget_large) {
+                    // Second bar on the same scale: the coffee share of today.
+                    if (coffeeToday > 0) {
+                        views.setViewVisibility(R.id.progress_coffee, View.VISIBLE)
+                        views.setProgressBar(R.id.progress_coffee, max, coffeeToday, false)
+                    } else {
+                        views.setViewVisibility(R.id.progress_coffee, View.GONE)
+                    }
+                }
             } else {
                 views.setTextViewText(R.id.txt_main, ctx.getString(R.string.main_placeholder))
-                views.setProgressBar(R.id.progress, 1, 0, false)
+                views.setProgressBar(R.id.progress, 1, 0, animating)
                 views.setTextViewText(
                     R.id.txt_sub,
                     note ?: err ?: ctx.getString(R.string.error_not_configured)
                 )
+                if (layoutId == R.layout.widget_large) {
+                    views.setViewVisibility(R.id.progress_coffee, View.GONE)
+                }
             }
 
             views.setOnClickPendingIntent(R.id.widget_root, broadcast(ctx, ACTION_REFRESH, 1))
@@ -116,11 +147,20 @@ class WaterWidgetProvider : AppWidgetProvider() {
             for ((viewId, coffee, actionAndCode) in coffees) {
                 val (action, requestCode) = actionAndCode
                 if (Config.coffeeEnabled(ctx, coffee)) {
-                    views.setViewVisibility(viewId, android.view.View.VISIBLE)
+                    views.setViewVisibility(viewId, View.VISIBLE)
                     views.setOnClickPendingIntent(viewId, broadcast(ctx, action, requestCode))
                 } else {
-                    views.setViewVisibility(viewId, android.view.View.GONE)
+                    views.setViewVisibility(viewId, View.GONE)
                 }
+            }
+
+            // Undo appears only while there is a same-day addition to revert.
+            val last = Config.loadLastAdd(ctx)
+            if (last != null && last.date == today) {
+                views.setViewVisibility(R.id.btn_undo, View.VISIBLE)
+                views.setOnClickPendingIntent(R.id.btn_undo, broadcast(ctx, ACTION_UNDO, 6))
+            } else {
+                views.setViewVisibility(R.id.btn_undo, View.GONE)
             }
             return views
         }
@@ -138,10 +178,13 @@ class WaterWidgetProvider : AppWidgetProvider() {
                 broadcast(ctx, ACTION_SYNC, 2)
             }
 
-        private fun subLine(ctx: Context, st: Config.Status, err: String?): String {
+        private fun subLine(ctx: Context, st: Config.Status, err: String?, coffeeToday: Int): String {
             val parts = mutableListOf("${st.percent}%")
             if (st.sweatLossMl > 0) {
                 parts += ctx.getString(R.string.sweat_bump, st.sweatLossMl)
+            }
+            if (coffeeToday > 0) {
+                parts += ctx.getString(R.string.coffee_tally, coffeeToday)
             }
             // The server reports "today" in its own time zone; flag a stale day.
             if (st.date.isNotEmpty() && st.date != LocalDate.now().toString()) {

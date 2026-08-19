@@ -62,10 +62,10 @@ object Config {
 
     // --- coffee quick-add buttons --------------------------------------------
 
-    enum class Coffee(val key: String, val defaultMl: Int) {
-        BLACK("black", 200),
-        WHITE("white", 250),
-        CAPPUCCINO("capp", 150),
+    enum class Coffee(val key: String, val defaultMl: Int, val labelRes: Int) {
+        BLACK("black", 200, R.string.coffee_black),
+        WHITE("white", 250, R.string.coffee_white),
+        CAPPUCCINO("capp", 150, R.string.coffee_capp),
     }
 
     fun coffeeEnabled(ctx: Context, c: Coffee): Boolean =
@@ -79,6 +79,41 @@ object Config {
             .putBoolean("coffee_${c.key}_on", enabled)
             .putInt("coffee_${c.key}_ml", ml.coerceIn(1, 2000))
             .apply()
+    }
+
+    // --- undo + today's coffee tally (all local-date keyed) ------------------
+
+    data class LastAdd(val ml: Int, val label: String, val date: String)
+
+    fun saveLastAdd(ctx: Context, ml: Int, label: String, date: String) {
+        prefs(ctx).edit()
+            .putInt("last_add_ml", ml)
+            .putString("last_add_label", label)
+            .putString("last_add_date", date)
+            .apply()
+    }
+
+    fun loadLastAdd(ctx: Context): LastAdd? {
+        val p = prefs(ctx)
+        val ml = p.getInt("last_add_ml", 0)
+        val date = p.getString("last_add_date", null)
+        return if (ml <= 0 || date == null) null
+        else LastAdd(ml, p.getString("last_add_label", "")!!, date)
+    }
+
+    fun clearLastAdd(ctx: Context) {
+        prefs(ctx).edit().remove("last_add_ml").remove("last_add_date").apply()
+    }
+
+    /** Running total of coffee logged via the widget for [date]; resets daily. */
+    fun coffeeToday(ctx: Context, date: String): Int {
+        val p = prefs(ctx)
+        return if (p.getString("ct_date", "") == date) p.getInt("ct_ml", 0) else 0
+    }
+
+    fun bumpCoffeeToday(ctx: Context, date: String, deltaMl: Int) {
+        val next = (coffeeToday(ctx, date) + deltaMl).coerceAtLeast(0)
+        prefs(ctx).edit().putString("ct_date", date).putInt("ct_ml", next).apply()
     }
 
     fun saveStatus(ctx: Context, s: Status) {

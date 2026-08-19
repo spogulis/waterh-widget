@@ -29,9 +29,19 @@ class WidgetUpdateWorker(appContext: Context, params: WorkerParameters) :
         }
         try {
             val addMl = inputData.getInt(KEY_ADD_ML, 0)
-            if (addMl > 0) {
+            if (addMl != 0) {
                 // /add replies with fresh status, so no second round-trip.
-                Config.saveStatus(ctx, Api.addIntake(server, addMl))
+                val st = Api.addIntake(server, addMl)
+                Config.saveStatus(ctx, st)
+                val today = java.time.LocalDate.now().toString()
+                Config.bumpCoffeeToday(ctx, today, addMl)
+                if (addMl > 0) {
+                    Config.saveLastAdd(
+                        ctx, addMl, inputData.getString(KEY_ADD_LABEL) ?: "", today
+                    )
+                } else {
+                    Config.clearLastAdd(ctx)   // an undo consumed the last add
+                }
             } else {
                 if (inputData.getBoolean(KEY_SYNC, false)) Api.runSync(server)
                 Config.saveStatus(ctx, Api.fetchStatus(server))
@@ -46,6 +56,7 @@ class WidgetUpdateWorker(appContext: Context, params: WorkerParameters) :
     companion object {
         private const val KEY_SYNC = "sync"
         private const val KEY_ADD_ML = "addMl"
+        private const val KEY_ADD_LABEL = "addLabel"
         private const val PERIODIC_WORK = "waterh-refresh"
         private const val REFRESH_WORK = "waterh-refresh-now"
         // Separate names so a refresh tap can't cancel a pending delayed sync,
@@ -66,12 +77,14 @@ class WidgetUpdateWorker(appContext: Context, params: WorkerParameters) :
             )
         }
 
-        fun enqueueAdd(ctx: Context, ml: Int) {
+        fun enqueueAdd(ctx: Context, ml: Int, label: String) {
             // Deliberately no network constraint: offline, the attempt fails
             // fast and the widget shows an error instead of the tap sitting
             // in a queue for hours and logging a long-forgotten coffee later.
             val req = OneTimeWorkRequestBuilder<WidgetUpdateWorker>()
-                .setInputData(Data.Builder().putInt(KEY_ADD_ML, ml).build())
+                .setInputData(
+                    Data.Builder().putInt(KEY_ADD_ML, ml).putString(KEY_ADD_LABEL, label).build()
+                )
                 .build()
             WorkManager.getInstance(ctx).enqueueUniqueWork(
                 ADD_WORK, ExistingWorkPolicy.APPEND_OR_REPLACE, req

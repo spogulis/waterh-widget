@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Compact variant: must fit a 1-cell-high widget, so every dp is rationed. -->
+<!-- Compact variant: must fit a 1-cell-high widget, so every dp is rationed.
+     Buttons carry gaps so neighbouring taps don't hit the wrong cup. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
@@ -20,7 +21,7 @@
 
         <TextView
             android:id="@+id/txt_main"
-        android:ellipsize="end"
+            android:ellipsize="end"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -34,6 +35,7 @@
             android:id="@+id/btn_black"
             android:layout_width="28dp"
             android:layout_height="28dp"
+            android:layout_marginStart="7dp"
             android:src="@drawable/ic_coffee_black"
             android:scaleType="fitCenter"
             android:padding="2dp"
@@ -44,6 +46,7 @@
             android:id="@+id/btn_white"
             android:layout_width="28dp"
             android:layout_height="28dp"
+            android:layout_marginStart="7dp"
             android:src="@drawable/ic_coffee_white"
             android:scaleType="fitCenter"
             android:padding="2dp"
@@ -54,6 +57,7 @@
             android:id="@+id/btn_capp"
             android:layout_width="28dp"
             android:layout_height="28dp"
+            android:layout_marginStart="7dp"
             android:src="@drawable/ic_coffee_capp"
             android:scaleType="fitCenter"
             android:padding="2dp"
@@ -61,10 +65,22 @@
             android:contentDescription="@string/coffee_capp" />
 
         <ImageButton
+            android:id="@+id/btn_undo"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="7dp"
+            android:visibility="gone"
+            android:src="@drawable/ic_undo"
+            android:scaleType="fitCenter"
+            android:padding="3dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/undo_last" />
+
+        <ImageButton
             android:id="@+id/btn_sync"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:layout_marginStart="4dp"
+            android:layout_marginStart="9dp"
             android:src="@drawable/ic_sync"
             android:scaleType="fitCenter"
             android:padding="2dp"

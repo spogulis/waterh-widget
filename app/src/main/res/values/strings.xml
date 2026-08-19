@@ -30,7 +30,10 @@
     <string name="coffee_white">White coffee</string>
     <string name="coffee_capp">Cappuccino</string>
     <string name="hint_ml">ml</string>
-    <string name="note_adding">Adding %1$d ml…</string>
+    <string name="note_adding">Adding %1$d ml of %2$s…</string>
+    <string name="note_removing">Removing %1$d ml (%2$s)…</string>
+    <string name="undo_last">Undo last coffee</string>
+    <string name="coffee_tally">☕ %1$d ml</string>
     <string name="waterh_not_found">WaterH app not found (%1$s) — syncing directly</string>
     <string name="widget_description">Water intake vs. Garmin dynamic goal</string>
 </resources>
