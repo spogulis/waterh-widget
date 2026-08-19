@@ -47,9 +47,11 @@
             android:excludeFromRecents="true"
             android:exported="false" />
 
+        <!-- Exported for maximum compatibility with OEM cover-display widget
+             hosts; onReceive only honors our own refresh/sync/add actions. -->
         <receiver
             android:name=".WaterWidgetProvider"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
