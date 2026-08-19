@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WaterH Widget</string>
+    <string name="main_placeholder">— / — ml</string>
+    <string name="main_line">%1$d / %2$d ml</string>
+    <string name="sweat_bump">goal +%1$d sweat</string>
+    <string name="sync_now">Sync now</string>
+    <string name="note_refreshing">Refreshing…</string>
+    <string name="note_syncing">Syncing WaterH → Garmin…</string>
+    <string name="error_not_configured">Open the app to set the server URL + key</string>
+    <string name="label_url">Server URL</string>
+    <string name="hint_url">http://10.x.x.x:8000</string>
+    <string name="label_key">Sync key (SYNC_KEY from .env)</string>
+    <string name="hint_key">long random string</string>
+    <string name="test">Test</string>
+    <string name="save">Save</string>
+    <string name="testing">Testing…</string>
+    <string name="test_ok">✅ OK — today %1$d ml of %2$d ml goal (sweat +%3$d ml)</string>
+    <string name="test_fail">❌ %1$s</string>
+    <string name="saved">Saved</string>
+    <string name="widget_description">Water intake vs. Garmin dynamic goal</string>
+</resources>
