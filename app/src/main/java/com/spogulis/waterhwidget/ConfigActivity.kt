@@ -34,10 +34,13 @@ class ConfigActivity : Activity() {
         }
 
         findViewById<Button>(R.id.btn_test).setOnClickListener {
-            val server = Config.Server(
-                urlField.text.toString().trim().trimEnd('/'),
-                keyField.text.toString().trim()
-            )
+            val url = Config.normalizeUrl(urlField.text.toString())
+            if (url.isEmpty()) {
+                result.text = getString(R.string.error_url_missing)
+                return@setOnClickListener
+            }
+            urlField.setText(url)
+            val server = Config.Server(url, keyField.text.toString().trim())
             result.text = getString(R.string.testing)
             thread {
                 val msg = try {
@@ -51,7 +54,13 @@ class ConfigActivity : Activity() {
         }
 
         findViewById<Button>(R.id.btn_save).setOnClickListener {
-            Config.saveServer(this, urlField.text.toString(), keyField.text.toString())
+            val url = Config.normalizeUrl(urlField.text.toString())
+            if (url.isEmpty()) {
+                result.text = getString(R.string.error_url_missing)
+                return@setOnClickListener
+            }
+            urlField.setText(url)
+            Config.saveServer(this, url, keyField.text.toString())
             WidgetUpdateWorker.schedulePeriodic(this)
             WidgetUpdateWorker.enqueueOnce(this, sync = false)
             Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show()

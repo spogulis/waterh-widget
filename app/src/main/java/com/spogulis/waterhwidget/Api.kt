@@ -2,6 +2,7 @@ package com.spogulis.waterhwidget
 
 import org.json.JSONObject
 import java.net.HttpURLConnection
+import java.net.MalformedURLException
 import java.net.URL
 import java.net.URLEncoder
 
@@ -36,7 +37,12 @@ object Api {
     private fun enc(s: String): String = URLEncoder.encode(s, "UTF-8")
 
     private fun get(url: String): String {
-        val conn = URL(url).openConnection() as HttpURLConnection
+        val parsed = try {
+            URL(url)
+        } catch (e: MalformedURLException) {
+            throw ApiException("Server URL must start with http:// or https://")
+        }
+        val conn = parsed.openConnection() as HttpURLConnection
         try {
             conn.connectTimeout = 10_000
             // /sync logs in to WaterH and writes to Garmin; give it time.

@@ -20,16 +20,22 @@ object Config {
 
     private fun prefs(ctx: Context) = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
+    /** Trim, drop trailing slashes, and default to http:// when no scheme given. */
+    fun normalizeUrl(raw: String): String {
+        val u = raw.trim().trimEnd('/')
+        return if (u.isEmpty() || u.contains("://")) u else "http://$u"
+    }
+
     fun loadServer(ctx: Context): Server? {
         val p = prefs(ctx)
-        val url = p.getString("baseUrl", "")!!.trim().trimEnd('/')
+        val url = normalizeUrl(p.getString("baseUrl", "")!!)
         val key = p.getString("key", "")!!.trim()
         return if (url.isEmpty() || key.isEmpty()) null else Server(url, key)
     }
 
     fun saveServer(ctx: Context, baseUrl: String, key: String) {
         prefs(ctx).edit()
-            .putString("baseUrl", baseUrl.trim().trimEnd('/'))
+            .putString("baseUrl", normalizeUrl(baseUrl))
             .putString("key", key.trim())
             .apply()
     }
